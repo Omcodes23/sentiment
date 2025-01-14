@@ -1,16 +1,17 @@
 from flask import Flask, request, jsonify
 from transformers import pipeline, AutoModelForSequenceClassification, AutoTokenizer
+import os
 
 # Initialize the Flask app
 app = Flask(__name__)
 
 # Load pre-trained models for sentiment and emotion analysis
-sentiment_model_name = "distilbert-base-uncased-finetuned-sst-2-english" 
+sentiment_model_name = "distilbert-base-uncased-finetuned-sst-2-english"
 sentiment_model = AutoModelForSequenceClassification.from_pretrained(sentiment_model_name)
 sentiment_tokenizer = AutoTokenizer.from_pretrained(sentiment_model_name)
 sentiment_analyzer = pipeline("text-classification", model=sentiment_model, tokenizer=sentiment_tokenizer)
 
-emotion_model_name = "j-hartmann/emotion-english-distilroberta-base" 
+emotion_model_name = "j-hartmann/emotion-english-distilroberta-base"
 emotion_model = AutoModelForSequenceClassification.from_pretrained(emotion_model_name)
 emotion_tokenizer = AutoTokenizer.from_pretrained(emotion_model_name)
 emotion_analyzer = pipeline("text-classification", model=emotion_model, tokenizer=emotion_tokenizer, return_all_scores=True)
@@ -68,4 +69,6 @@ def emotion():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    app.run(debug=False)
+    # Use environment variable for port or default to 5000
+    port = int(os.environ.get("PORT", 5000))
+    app.run(debug=False, host='0.0.0.0', port=port)
